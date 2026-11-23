@@ -34,6 +34,7 @@ class ReadAloudService : Service() {
     private val keeper: ReadAloudKeeper by inject()
     private var session: MediaSession? = null
     private var focusRequest: AudioFocusRequest? = null
+    private var legacyFocus = false
 
     /** The keeper's controls, for the focus changes that pause the reading and let it go on. */
     private val focusPause = FocusPause(
@@ -140,7 +141,14 @@ class ReadAloudService : Service() {
      * and Read aloud always played over them.
      */
     private fun requestFocus() {
-        if (focusRequest != null) return
+        if (focusRequest != null || legacyFocus) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // AudioFocusRequest is API 26; Android 7 asks the old way.
+            legacyFocus = getSystemService(AudioManager::class.java)
+                .requestAudioFocus(focusChanged, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT) ==
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+            return
+        }
         val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -154,6 +162,11 @@ class ReadAloudService : Service() {
     }
 
     private fun abandonFocus() {
+        if (legacyFocus) {
+            legacyFocus = false
+            getSystemService(AudioManager::class.java).abandonAudioFocus(focusChanged)
+            return
+        }
         val request = focusRequest ?: return
         focusRequest = null
         getSystemService(AudioManager::class.java).abandonAudioFocusRequest(request)

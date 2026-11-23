@@ -2,7 +2,6 @@ package dev.hermeskotlin.android.phone
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -12,6 +11,7 @@ import android.os.Bundle
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import dev.hermeskotlin.android.HeraldActivity
@@ -64,12 +64,13 @@ class PhoneConfirmations(private val context: Context) {
      * changes, so it takes the new name.
      */
     fun createChannel() {
-        system?.createNotificationChannel(
-            NotificationChannel(CHANNEL, text(R.string.channel_phone_tools_name), NotificationManager.IMPORTANCE_HIGH).apply {
-                description = text(R.string.channel_phone_tools_description)
-                if (system.isNotificationPolicyAccessGranted) setBypassDnd(true)
-            },
-        )
+        // NotificationChannelCompat, not android.app.NotificationChannel: the latter is API 26 and this app runs on 24.
+        val channel = NotificationChannelCompat.Builder(CHANNEL, NotificationManagerCompat.IMPORTANCE_HIGH)
+            .setName(text(R.string.channel_phone_tools_name))
+            .setDescription(text(R.string.channel_phone_tools_description))
+            .setBypassDnd(system?.isNotificationPolicyAccessGranted == true)
+            .build()
+        NotificationManagerCompat.from(context).createNotificationChannel(channel)
     }
 
     /** One of the app's lines in the user's language, for a question or what a tool tells. */
@@ -80,9 +81,9 @@ class PhoneConfirmations(private val context: Context) {
 
     /** Why a question can't reach the user now, or null when it can. */
     private fun cantAsk(): String? {
-        val channel = system?.getNotificationChannel(CHANNEL)
+        val channel = NotificationManagerCompat.from(context).getNotificationChannel(CHANNEL)
         return when {
-            !manager.areNotificationsEnabled() || channel?.importance == NotificationManager.IMPORTANCE_NONE ->
+            !manager.areNotificationsEnabled() || channel?.importance == NotificationManagerCompat.IMPORTANCE_NONE ->
                 "Kyllene's notifications for phone tools are off, so the phone couldn't ask the user."
             system?.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_NONE ||
                 system?.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_ALARMS ->
