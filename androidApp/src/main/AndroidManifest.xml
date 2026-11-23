@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- API 24/25 fork: Health Connect only exists from API 26; HealthTool guards it at runtime. -->
+    <uses-sdk tools:overrideLibrary="androidx.health.connect.client" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- A GPT-Live call switches the audio to call mode and the speaker. -->
