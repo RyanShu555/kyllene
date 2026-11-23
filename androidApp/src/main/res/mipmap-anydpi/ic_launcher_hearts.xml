@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pink's summit at dawn, with hearts in its sky (AppIcons). -->
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_bg_hearts" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground_pink" />
-    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
-</adaptive-icon>
+<!-- API 24/25 fallback: same artwork, <adaptive-icon> needs API 26. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_bg_hearts" />
+    <item android:drawable="@drawable/ic_launcher_foreground_pink" />
+</layer-list>
