@@ -49,7 +49,7 @@ android-compileSdk = "37"
 # Compose 1.13 and A2UI need 37.1.
 android-compileSdkMinor = "1"
 android-targetSdk = "36"
-android-minSdk = "26"
+android-minSdk = "24"
 
 [libraries]
 pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.8" }

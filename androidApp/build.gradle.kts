@@ -90,6 +90,11 @@ android {
         )
     }
 
+    // API 24/25 (Android 7.0/7.1): java.time comes from desugaring, not the platform.
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -127,4 +132,6 @@ dependencies {
     // The Pebble companion's link to Kyllene's Pebble watchapp (pebbleApp), through the Pebble phone app.
     implementation(libs.pebblekit2.client)
     debugImplementation(libs.compose.ui.tooling)
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
