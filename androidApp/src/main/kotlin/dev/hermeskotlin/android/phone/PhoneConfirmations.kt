@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.os.Build
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -68,9 +69,12 @@ class PhoneConfirmations(private val context: Context) {
         val channel = NotificationChannelCompat.Builder(CHANNEL, NotificationManagerCompat.IMPORTANCE_HIGH)
             .setName(text(R.string.channel_phone_tools_name))
             .setDescription(text(R.string.channel_phone_tools_description))
-            .setBypassDnd(system?.isNotificationPolicyAccessGranted == true)
             .build()
         NotificationManagerCompat.from(context).createNotificationChannel(channel)
+        // The compat builder has no Do-Not-Disturb bypass setter; the platform channel does, from API 26 on.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && system?.isNotificationPolicyAccessGranted == true) {
+            system.getNotificationChannel(CHANNEL)?.setBypassDnd(true)
+        }
     }
 
     /** One of the app's lines in the user's language, for a question or what a tool tells. */
