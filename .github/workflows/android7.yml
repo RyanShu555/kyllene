@@ -21,6 +21,18 @@ jobs:
           distribution: jetbrains
           java-version: "25"
 
+      - name: Fixed signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.FORK_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.FORK_STORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.FORK_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            printf '%s' "$KEYSTORE_B64" | base64 -d > fork-debug.p12
+            echo "FORK_STORE_PASSWORD=$KEYSTORE_PASS" >> "$GITHUB_ENV"
+            echo "FORK_KEY_PASSWORD=$KEY_PASS" >> "$GITHUB_ENV"
+          fi
+
       - name: Build debug APK
         run: ./gradlew --no-daemon :androidApp:assembleDebug
 

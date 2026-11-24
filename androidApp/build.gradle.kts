@@ -52,6 +52,20 @@ android {
         }
     }
 
+
+    // Fork: one fixed key, so a rebuilt APK installs over the last one and the sign-in survives. The key file is
+    // written from a CI secret; without it gradle falls back to the ordinary throwaway debug key.
+    val forkStore = rootProject.file("fork-debug.p12")
+    if (forkStore.exists() && signingConfigs.findByName("forkDebug") == null) {
+        signingConfigs.create("forkDebug") {
+            storeFile = forkStore
+            storeType = "PKCS12"
+            storePassword = System.getenv("FORK_STORE_PASSWORD") ?: "fork"
+            keyAlias = System.getenv("FORK_KEY_ALIAS") ?: "kyllene"
+            keyPassword = System.getenv("FORK_KEY_PASSWORD") ?: System.getenv("FORK_STORE_PASSWORD") ?: "fork"
+        }
+    }
+
     // WebRTC's native library is 7–16 MB per ABI; compressed in the APK it is about a third of that.
     packaging { jniLibs.useLegacyPackaging = true }
 
@@ -96,6 +110,9 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            signingConfigs.findByName("forkDebug")?.let { signingConfig = it }
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
